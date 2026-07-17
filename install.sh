@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Sigma-Discipline installer.
 #
-# Installs the wishlist + roadmap planning discipline into whichever of
-# Claude Code / Codex / OpenCode are present, from the single canonical source
+# Installs the wishlist + roadmap planning discipline and the wrap-up +
+# sigma-check shipping discipline into whichever of Claude Code / Codex /
+# OpenCode are present, from the single canonical source
 # (skills/<name>/SKILL.md). Derived files are regenerated each run.
 #
 #   ./install.sh                      auto-detect installed tools, install all found
@@ -14,7 +15,7 @@ set -euo pipefail
 
 REPO="$(cd "$(dirname "$0")" && pwd)"
 SKILLS_DIR="$REPO/skills"
-NAMES="wishlist roadmap"
+NAMES="wishlist roadmap wrap-up sigma-check"
 
 CLAUDE_SKILLS="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills"
 CODEX_PROMPTS="${CODEX_HOME:-$HOME/.codex}/prompts"
@@ -65,6 +66,12 @@ did_any=0
 install_claude() {
   mkdir -p "$CLAUDE_SKILLS"
   for n in $NAMES; do
+    # A pre-existing REAL dir (hand-authored or copied) makes `ln -sfn` nest the
+    # symlink INSIDE it instead of replacing it — move it aside first, keep it.
+    if [ -d "$CLAUDE_SKILLS/$n" ] && [ ! -L "$CLAUDE_SKILLS/$n" ]; then
+      mv "$CLAUDE_SKILLS/$n" "$CLAUDE_SKILLS/$n.pre-sigma-discipline.bak"
+      echo "  claude   ⚠ existing $CLAUDE_SKILLS/$n moved to $n.pre-sigma-discipline.bak"
+    fi
     ln -sfn "$SKILLS_DIR/$n" "$CLAUDE_SKILLS/$n"
     echo "  claude   → $CLAUDE_SKILLS/$n  (symlink)"
   done
@@ -103,7 +110,7 @@ if [ "$UNINSTALL" -eq 1 ]; then
   exit 0
 fi
 
-echo "Installing Sigma-Discipline (wishlist + roadmap) from $REPO"
+echo "Installing Sigma-Discipline (wishlist + roadmap + wrap-up + sigma-check) from $REPO"
 if [ "$WANT_CLAUDE" -eq 1 ];   then install_claude;   did_any=1; fi
 if [ "$WANT_CODEX" -eq 1 ];    then install_codex;    did_any=1; fi
 if [ "$WANT_OPENCODE" -eq 1 ]; then install_opencode; did_any=1; fi
@@ -115,7 +122,8 @@ fi
 
 cat <<'EOF'
 
-Done. Invoke with /wishlist and /roadmap in any of the installed tools.
+Done. Invoke with /wishlist, /roadmap, /wrap-up and /sigma-check in any of the
+installed tools.
 
 Always-on (optional): slash-commands are pull-based. To make the discipline apply
 automatically in a project, copy this repo's AGENTS.md into your project root
