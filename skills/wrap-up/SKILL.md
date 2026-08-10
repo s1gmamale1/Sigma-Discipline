@@ -35,6 +35,13 @@ verification passed. If not, STOP and finish first.
      branch, so it's safe; the feature branch whose work you just merged is the common case). Never
      delete the branch you're on. Surface any **unmerged / stale** branches to the user instead of
      force-deleting them.
+   - **LOCAL ONLY — never delete the remote branch.** No `git push origin --delete <branch>`, no
+     `gh pr merge --delete-branch`, no deleting branches through the web UI. Because the merge is a
+     squash, the branch is the only surviving record of how the work was actually made — the review
+     rounds, the fixes, the intermediate commits; main keeps just the one collapsed commit. Keeping
+     it on the remote costs nothing and is deliberate: treat a remote branch as history to retain,
+     not clutter to sweep. (`git remote prune origin` is still fine — it only drops local refs to
+     branches that are already gone.)
    - Remove dead code the shipped change orphaned (now-unused files/imports). Grep that
      nothing imports them first — **then re-run the build + tests after deleting**: a file
      that wasn't actually dead fails compilation, and that is the *only* real proof the
@@ -62,6 +69,7 @@ verification passed. If not, STOP and finish first.
 | Delete a local database / memory store / cache you're meant to KEEP or UPDATE | That state is often the thing the project relies on between runs — losing it is silent and expensive. |
 | `git worktree remove` an existing worktree | Most belong to other live sessions / may hold unmerged work. Only `prune` dead refs; surface stale ones to the user — never force-remove. |
 | `git branch -D` (force-delete) a branch, or delete an unmerged / current branch | Force-delete discards unmerged commits irrecoverably. Only `-d` (safe) branches already merged into the integration branch; surface unmerged / stale ones to the user. |
+| Delete a **remote** branch — `git push origin --delete <branch>`, `gh pr merge --delete-branch`, or the web UI | The remote branch is kept on purpose. After a squash merge it is the only record of how the work was made; main has just the collapsed commit. Prune locally, never on the remote. |
 | Touch infra unrelated to the shipped change | Out of scope for housekeeping. If the task didn't change it, leave it. |
 
 ## Common mistakes
