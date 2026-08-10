@@ -76,10 +76,12 @@ On FINDINGS, deploy a **separate** fixer subagent (not the reviewer) to fix only
 ## Merge (only when the gate is green)
 
 Delegate the merge to `sigma-pr-review`'s policy:
-- **Owner self-PR** (`author == s1gmamale1`): `gh pr merge <N> --admin --squash --delete-branch` (the `--admin` is the can't-approve-own-PR structural case — never to bypass a red gate).
-- **Third-party**: `gh pr review --approve` → `gh pr merge <N> --squash --delete-branch`.
+- **Owner self-PR** (`author == s1gmamale1`): `gh pr merge <N> --admin --squash` (the `--admin` is the can't-approve-own-PR structural case — never to bypass a red gate).
+- **Third-party**: `gh pr review --approve` → `gh pr merge <N> --squash`.
 
-After merge: report the verdict + the merge SHA, and run post-ship housekeeping (`wrap-up` / `wrap-up-sigmalink`: prune the branch/worktree, sync docs/memory).
+**Never pass `--delete-branch`, and never delete the remote branch afterwards.** A squash merge collapses the whole branch into one commit on main, so the branch is the *only* remaining record of how the work actually got made — the review rounds, the fixes, the intermediate commits. Keeping it on the remote costs nothing and preserves that history; deleting it throws away the audit trail the review loop just produced. Local branch pruning is a separate matter and stays allowed (see `wrap-up`).
+
+After merge: report the verdict + the merge SHA, and run post-ship housekeeping (`wrap-up` / `wrap-up-sigmalink`: prune the local branch/worktree, sync docs/memory — the remote branch stays).
 
 ## Hard stops (never auto — stop and report for sign-off)
 
@@ -96,7 +98,7 @@ After merge: report the verdict + the merge SHA, and run post-ship housekeeping 
 | Review | fresh subagent, full gate | `Agent` + sigma-pr-review · /code-review · /github-code-review · snitch |
 | CI | required checks | `gh pr checks <N>` |
 | Fix | separate subagent, Critical/Important only | `Agent` + re-run local gate + push |
-| Merge | green only, squash | `gh pr merge <N> --squash --delete-branch` (owner: `--admin`) |
+| Merge | green only, squash, **keep the remote branch** | `gh pr merge <N> --squash` (owner: `--admin`) |
 | Give up | after round 3 | stop + BLOCKED report |
 
 ## Common mistakes
