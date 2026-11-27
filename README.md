@@ -26,28 +26,34 @@ Full cycle: **capture → triage → promote → build → `/sigma-check` (ship)
 This repo packages that discipline as slash-commands / skills for **Claude Code**, **Codex**, and
 **OpenCode**, from a single canonical source so the three never drift.
 
-## MVP task and milestone checkpoints
+## Checkpoints
 
-Use [mvp-checkpoint](skills/mvp-checkpoint/SKILL.md) after each implementation task and whenever verified readiness crosses 20%, 40%, 60%, 80% or 100%. It covers plan drift, evidence, cleanup, efficiency and the owner's decision to resume at milestones. It also works in a single-agent project.
+| Skill | Trigger | Decision |
+|---|---|---|
+| [checkpoints](skills/checkpoints/SKILL.md) | An implementation task finishes or fails | Verify the changed behavior against its requirement, clean up its resources and accept, repair or block the task. |
+| [project-checkpoints](skills/project-checkpoints/SKILL.md) | Overall readiness reaches a milestone, or the owner calls a project review | Stop project work, clean up across the project, review journeys and vision, report readiness and wait for explicit resume. |
 
-From a persistent checkout, select the local agents you use. This command installs only the checkpoint skill. Add `--uninstall` to remove its links.
+Install from a persistent checkout. Choose the targets you use.
 
 ```sh
-./install.sh checkpoint --codex --claude --grok --hermes
+./install.sh checkpoints --claude --codex
+./install.sh project-checkpoints --grok --hermes
+# Both skills on all four local agents (also migrates the old combined link)
+./install.sh checkpoint --claude --codex --grok --hermes
 ```
 
-| Agent | Discovery location | Use in a fresh session |
+Add `--uninstall` to remove the selected links. The bundle command retires a legacy `mvp-checkpoint` link owned by this checkout. Installations from other checkouts stay with their original owner.
+
+| Agent | Skill directory | Invocation in a fresh session |
 |---|---|---|
-| Codex | `~/.agents/skills/mvp-checkpoint` | `$mvp-checkpoint` |
-| Claude Code | `~/.claude/skills/mvp-checkpoint` | `/mvp-checkpoint` |
-| Grok Build | `~/.grok/skills/mvp-checkpoint` | Ask for `mvp-checkpoint` by name |
-| Hermes Agent | `~/.hermes/skills/mvp-checkpoint` | `/mvp-checkpoint` |
+| Codex | `~/.agents/skills` | `$checkpoints` or `$project-checkpoints` |
+| Claude Code | `~/.claude/skills` | `/checkpoints` or `/project-checkpoints` |
+| Grok Build | `~/.grok/skills` | Ask for either skill by name |
+| Hermes Agent | `~/.hermes/skills` | `/checkpoints` or `/project-checkpoints` |
 
-The installer respects `CLAUDE_CONFIG_DIR`, `GROK_HOME` and `HERMES_HOME`. The links follow updates to this checkout. [Grok Build skill discovery](https://docs.x.ai/build/features/skills-plugins-marketplaces) · [Hermes skills](https://hermes-agent.nousresearch.com/docs/guides/work-with-skills)
+The installer respects `CLAUDE_CONFIG_DIR`, `GROK_HOME` and `HERMES_HOME`. [Grok Build discovery](https://docs.x.ai/build/features/skills-plugins-marketplaces) · [Hermes skills](https://hermes-agent.nousresearch.com/docs/guides/work-with-skills)
 
-**Grok Bot** has its own private skill library. Attach the [canonical SKILL.md](skills/mvp-checkpoint/SKILL.md) in a Bot conversation and ask “Save these instructions as a private skill named mvp-checkpoint. Preserve both checkpoint rules and the explicit resume requirement.” Enable it under **Connect apps → Private skills** if needed, then ask the Bot to use it by name. After a repository update, refresh the private copy. [Grok Bot skills](https://docs.x.ai/grok-bot/skills-routines-and-automations)
-
-To check discovery and behavior, ask the agent what it would do if verified readiness moved from 38% to 41% just before a demo. It should report 41%, perform the 40% whole-project review and wait for explicit resume.
+**Grok Bot** uses private skills. Attach each linked SKILL.md separately and ask the Bot to save its instructions under its frontmatter name. Enable the two entries in **Connect apps → Private skills** and invoke either by name. Refresh those copies after updates. [Grok Bot skills](https://docs.x.ai/grok-bot/skills-routines-and-automations)
 
 ## Layout
 

@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
-# Install just mvp-checkpoint from a persistent checkout.
+# Install either checkpoint skill, or migrate the former combined installation.
 set -euo pipefail
-src="$(cd "$(dirname "$0")/../skills/mvp-checkpoint" && pwd)"
+skills="$(cd "$(dirname "$0")/../skills" && pwd)"
+selection="$1"
+shift
+case "$selection" in
+  checkpoints|project-checkpoints) names=("$selection") ;;
+  checkpoint) names=(checkpoints project-checkpoints) ;;
+  *) exit 2 ;;
+esac
 remove=0
 targets=()
 for arg in "$@"; do
@@ -18,15 +25,30 @@ if [ "${#targets[@]}" -eq 0 ]; then
   echo 'Usage: ./install.sh checkpoint [--uninstall] --codex | --claude | --grok | --hermes (combine targets as needed)' >&2
   exit 2
 fi
+# Check every destination before changing the first one.
 for dir in "${targets[@]}"; do
-  dst="$dir/mvp-checkpoint"
-  if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$src" ]; then
-    if [ "$remove" -eq 1 ]; then rm "$dst"; fi
-  elif [ -e "$dst" ] || [ -L "$dst" ]; then
-    echo "Preserved existing skill at $dst; it belongs to a different installation." >&2
-    exit 1
-  elif [ "$remove" -eq 0 ]; then
-    mkdir -p "$dir"
-    ln -s "$src" "$dst"
+  for name in "${names[@]}"; do
+    dst="$dir/$name"
+    if [[ -e "$dst" || -L "$dst" ]]; then
+      if [[ ! -L "$dst" || "$(readlink "$dst")" != "$skills/$name" ]]; then
+        echo "Preserved existing installation at $dst" >&2
+        exit 1
+      fi
+    fi
+  done
+done
+for dir in "${targets[@]}"; do
+  for name in "${names[@]}"; do
+    dst="$dir/$name"
+    if [[ "$remove" == 1 ]]; then
+      if [[ -L "$dst" ]]; then rm "$dst"; fi
+    elif [[ ! -L "$dst" ]]; then
+      mkdir -p "$dir"
+      ln -s "$skills/$name" "$dst"
+    fi
+  done
+  old="$dir/mvp-checkpoint"
+  if [[ "$selection" == checkpoint && -L "$old" && "$(readlink "$old")" == "$skills/mvp-checkpoint" ]]; then
+    rm "$old"
   fi
 done
