@@ -15,9 +15,10 @@
 set -euo pipefail
 
 REPO="$(cd "$(dirname "$0")" && pwd)"
-if [ "${1:-}" = checkpoint ]; then
+if [[ "${1:-}" == checkpoint || "${1:-}" == checkpoints || "${1:-}" == project-checkpoints ]]; then
+  selection="$1"
   shift
-  exec bash "$REPO/scripts/install-checkpoint.sh" "$@"
+  exec bash "$REPO/scripts/install-checkpoint.sh" "$selection" "$@"
 fi
 SKILLS_DIR="$REPO/skills"
 NAMES="wishlist roadmap wrap-up sigma-check"
