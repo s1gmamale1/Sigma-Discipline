@@ -26,6 +26,29 @@ Full cycle: **capture → triage → promote → build → `/sigma-check` (ship)
 This repo packages that discipline as slash-commands / skills for **Claude Code**, **Codex**, and
 **OpenCode**, from a single canonical source so the three never drift.
 
+## MVP task and milestone checkpoints
+
+Use [mvp-checkpoint](skills/mvp-checkpoint/SKILL.md) after each implementation task and whenever verified readiness crosses 20%, 40%, 60%, 80% or 100%. It covers plan drift, evidence, cleanup, efficiency and the owner's decision to resume at milestones. It also works in a single-agent project.
+
+From a persistent checkout, select the local agents you use. This command installs only the checkpoint skill. Add `--uninstall` to remove its links.
+
+```sh
+./install.sh checkpoint --codex --claude --grok --hermes
+```
+
+| Agent | Discovery location | Use in a fresh session |
+|---|---|---|
+| Codex | `~/.agents/skills/mvp-checkpoint` | `$mvp-checkpoint` |
+| Claude Code | `~/.claude/skills/mvp-checkpoint` | `/mvp-checkpoint` |
+| Grok Build | `~/.grok/skills/mvp-checkpoint` | Ask for `mvp-checkpoint` by name |
+| Hermes Agent | `~/.hermes/skills/mvp-checkpoint` | `/mvp-checkpoint` |
+
+The installer respects `CLAUDE_CONFIG_DIR`, `GROK_HOME` and `HERMES_HOME`. The links follow updates to this checkout. [Grok Build skill discovery](https://docs.x.ai/build/features/skills-plugins-marketplaces) · [Hermes skills](https://hermes-agent.nousresearch.com/docs/guides/work-with-skills)
+
+**Grok Bot** has its own private skill library. Attach the [canonical SKILL.md](skills/mvp-checkpoint/SKILL.md) in a Bot conversation and ask “Save these instructions as a private skill named mvp-checkpoint. Preserve both checkpoint rules and the explicit resume requirement.” Enable it under **Connect apps → Private skills** if needed, then ask the Bot to use it by name. After a repository update, refresh the private copy. [Grok Bot skills](https://docs.x.ai/grok-bot/skills-routines-and-automations)
+
+To check discovery and behavior, ask the agent what it would do if verified readiness moved from 38% to 41% just before a demo. It should report 41%, perform the 40% whole-project review and wait for explicit resume.
+
 ## Layout
 
 ```

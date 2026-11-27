@@ -8,12 +8,17 @@
 #
 #   ./install.sh                      auto-detect installed tools, install all found
 #   ./install.sh --claude --codex     install only the named tools
+#   ./install.sh checkpoint --codex --claude --grok --hermes
 #   ./install.sh --opencode
 #   ./install.sh --uninstall          remove installed skills/prompts/commands
 #                                      (never touches your WISHLIST.md / ROADMAP.md)
 set -euo pipefail
 
 REPO="$(cd "$(dirname "$0")" && pwd)"
+if [ "${1:-}" = checkpoint ]; then
+  shift
+  exec bash "$REPO/scripts/install-checkpoint.sh" "$@"
+fi
 SKILLS_DIR="$REPO/skills"
 NAMES="wishlist roadmap wrap-up sigma-check"
 
